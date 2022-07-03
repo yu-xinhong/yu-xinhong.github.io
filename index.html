@@ -64,6 +64,34 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-java后台处理base64图片还原为文件" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2022/07/03/java%E5%90%8E%E5%8F%B0%E5%A4%84%E7%90%86base64%E5%9B%BE%E7%89%87%E8%BF%98%E5%8E%9F%E4%B8%BA%E6%96%87%E4%BB%B6/" class="article-date">
+  <time datetime="2022-07-03T15:01:24.864Z" itemprop="datePublished">2022-07-03</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="java后台处理base64图片还原为文件"><a href="#java后台处理base64图片还原为文件" class="headerlink" title="java后台处理base64图片还原为文件"></a>java后台处理base64图片还原为文件</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 将base64图片解析成文件存放本地</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> imgStr</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span>  本地临时文件的地址</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> String  <span class="title function_">generateImage</span><span class="params">(String imgStr)</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(Strings.isNullOrEmpty(imgStr))&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">BASE64Decoder</span> <span class="variable">decoder</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BASE64Decoder</span>();</span><br><span class="line">    <span class="comment">//转换前端数据</span></span><br><span class="line">    imgStr = imgStr.replaceAll(<span class="string">&quot; &quot;</span>, <span class="string">&quot;+&quot;</span>);</span><br><span class="line">    <span class="comment">//去除多余部分</span></span><br><span class="line">    imgStr=imgStr.replace(<span class="string">&quot;data:image/png;base64,&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// Base64解码</span></span><br><span class="line">        <span class="type">byte</span>[] b = decoder.decodeBuffer(imgStr);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; b.length; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (b[i] &lt; <span class="number">0</span>) &#123;<span class="comment">// 调整异常数据</span></span><br><span class="line">                b[i] += <span class="number">256</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">String</span> <span class="variable">filepath</span> <span class="operator">=</span>System.getProperty(<span class="string">&quot;java.io.tmpdir&quot;</span>) +<span class="string">&quot;测试&quot;</span>+System.currentTimeMillis()+<span class="string">&quot;.png&quot;</span>;</span><br><span class="line">        <span class="type">File</span> <span class="variable">file</span>  <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(filepath);</span><br><span class="line">        <span class="keyword">if</span>(file.exists())&#123;</span><br><span class="line">            file.delete();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(file);</span><br><span class="line">        fos.write(b);</span><br><span class="line">        fos.flush();</span><br><span class="line">        fos.close();</span><br><span class="line">        logger.info(<span class="string">&quot;路径&quot;</span>+filepath);</span><br><span class="line">        <span class="keyword">return</span> filepath;</span><br><span class="line"></span><br><span class="line">    &#125;<span class="keyword">catch</span>(Exception e)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/07/03/java%E5%90%8E%E5%8F%B0%E5%A4%84%E7%90%86base64%E5%9B%BE%E7%89%87%E8%BF%98%E5%8E%9F%E4%B8%BA%E6%96%87%E4%BB%B6/" data-id="cl55fyjdh0003k4nig4b22h7e" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-java二维数组" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2022/07/03/java%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84/" class="article-date">
@@ -83,7 +111,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/03/java%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84/" data-id="cl55ffijk0001i8ni6z3v1ixw" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/03/java%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84/" data-id="cl55fyjdh0002k4nic4431ylv" class="article-share-link">Share</a>
       
       
     </footer>
@@ -111,7 +139,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/03/byte%E6%95%B0%E7%BB%84%E5%92%8CFile%EF%BC%8CInputStream%E4%BA%92%E8%BD%AC/" data-id="cl55ffijf0000i8niftjn8nw5" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/03/byte%E6%95%B0%E7%BB%84%E5%92%8CFile%EF%BC%8CInputStream%E4%BA%92%E8%BD%AC/" data-id="cl55fyjdf0001k4ni168j5x41" class="article-share-link">Share</a>
       
       
     </footer>
@@ -160,7 +188,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/07/03/hello-world/" data-id="cl55ffijq0002i8nihsg6a8gp" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/07/03/hello-world/" data-id="cl55fyjdb0000k4nidjxy9fo6" class="article-share-link">Share</a>
       
       
     </footer>
@@ -199,6 +227,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2022/07/03/java%E5%90%8E%E5%8F%B0%E5%A4%84%E7%90%86base64%E5%9B%BE%E7%89%87%E8%BF%98%E5%8E%9F%E4%B8%BA%E6%96%87%E4%BB%B6/">(no title)</a>
+          </li>
         
           <li>
             <a href="/2022/07/03/java%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84/">(no title)</a>
